@@ -1,0 +1,38 @@
+[
+    {
+        "type": "info",
+        "headers": {
+            "from": "A",
+            "to": "B",
+            "hop_count": 2
+        },
+        "payload": "Hello from A to E!"
+    },
+    {
+        "type": "info",
+        "headers": {
+            "from": "B",
+            "to": "D",
+            "hop_count": 3
+        },
+        "payload": "Hello from A to E!"
+    },
+    {
+        "type": "info",
+        "headers": {
+            "from": "D",
+            "to": "C",
+            "hop_count": 4
+        },
+        "payload": "Hello from A to E!"
+    },
+    {
+        "type": "info",
+        "headers": {
+            "from": "D",
+            "to": "E",
+            "hop_count": 4
+        },
+        "payload": "Hello from A to E!"
+    }
+]
