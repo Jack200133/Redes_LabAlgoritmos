@@ -2,6 +2,7 @@ import json
 import networkx as nx
 import matplotlib.pyplot as plt
 
+
 class Node:
     def __init__(self, name):
         self.name = name
@@ -11,7 +12,8 @@ class Node:
     def add_neighbor(self, neighbor):
         self.neighbors.append(neighbor)
     
-    # Funcion para enviar mensaje (Dado que manejamos un arbol de conexiones, de manera recursiva, enviamos los mensajes simulando el flooding)
+    # Funcion para enviar mensaje (Dado que manejamos un arbol de conexiones,
+    # de manera recursiva, enviamos los mensajes simulando el flooding)
     def send_message(self, message, target, seen=None, log=None):
         if not seen:
             seen = {self.name}
@@ -20,7 +22,8 @@ class Node:
 
         message['headers']['hop_count'] += 1
 
-        # Por todos los vecinos del nodo enviamos el mensaje tomando en cuenta no repetir un nodo
+        # Por todos los vecinos del nodo enviamos el mensaje
+        # tomando en cuenta no repetir un nodo
         for neighbor in self.neighbors:
             if neighbor.name not in seen:
                 seen.add(neighbor.name)
@@ -32,6 +35,7 @@ class Node:
                 neighbor.send_message(new_msg, target, seen, log)
 
         return log
+
 
 def simulate_flooding():
     # Grafo
@@ -90,6 +94,7 @@ def simulate_flooding():
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
 
     plt.show()
+
 
 if __name__ == "__main__":
     simulate_flooding()

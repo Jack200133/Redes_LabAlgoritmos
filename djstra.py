@@ -1,51 +1,107 @@
-import json
 import heapq
+import json
 
-def dijkstra(graph, start):
-    # Inicialización
-    distances = {node: float('infinity') for node in graph}
-    distances[start] = 0
-    priority_queue = [(0, start)]
 
-    while priority_queue:
-        current_distance, current_node = heapq.heappop(priority_queue)
+def load_json(path):
+    print("Para cambiar la topoligia cambie el archivo 'topos.json'")
+    try:
+        with open(path, "r") as archivo:
+            return json.load(archivo)
+    except FileNotFoundError:
+        print("El archivo de topología no se encontró.")
+    except json.JSONDecodeError:
+        print("Error al decodificar el archivo JSON.")
 
-        if current_distance > distances[current_node]:
-            continue
 
-        for neighbor, weight in graph[current_node].items():
-            distance = current_distance + weight
+class DijkstraNode():
+    
+    def __init__(self):
+        self.name = input("Ingresa el nombre del nodo: ")
+        self.topology = load_json("topos.json")
+        self.dijkstra()
+    
+    def dijkstra(self):
+        self.distances = {}
+        self.previous = {}
+        self.queue = []
+        
+        for node in self.topology:
+            if node == self.name:
+                self.distances[node] = 0
+                heapq.heappush(self.queue, (0, node))
+            else:
+                self.distances[node] = float("inf")
+                heapq.heappush(self.queue, (float("inf"), node))
+            self.previous[node] = None
+        
+        while self.queue:
+            u = heapq.heappop(self.queue)
+            u = u[1]
+            for v, w in self.topology[u].items():
+                alt = self.distances[u] + w
+                if alt < self.distances[v]:
+                    self.distances[v] = alt
+                    self.previous[v] = u
+                    for i in range(len(self.queue)):
+                        if self.queue[i][1] == v:
+                            self.queue[i] = (alt, v)
+                            heapq.heapify(self.queue)
+        
+        self.create_routing_table()
+    
+    def create_routing_table(self):
+        self.routing_table = {}
+        for node, previous_node in self.previous.items():
+            if previous_node is not None:
+                path = self.get_path(node)
+                self.routing_table[node] = (path, self.distances[node])
 
-            if distance < distances[neighbor]:
-                distances[neighbor] = distance
-                heapq.heappush(priority_queue, (distance, neighbor))
+    def get_path(self, destination):
+        path = [destination]
+        while self.previous[destination] is not None:
+            destination = self.previous[destination]
+            path.insert(0, destination)
+        return path
 
-    return distances
+    def receive_message(self, emisor, receptor, mensaje):
+        if receptor == self.name:
+            print("El mensaje ha llegado al destino.")
+            print(mensaje)
+        else:
+            siguiente = self.get_path(receptor)[1]
+            print(f"Enviar mensaje a {siguiente}. Mensaje: {mensaje}\n")
+            print(f"{emisor},{receptor},{mensaje}")
+            
 
-def main():
-    # Suponiendo que el grafo está representado como un diccionario
-    graph = {
-        'A': {'B': 1, 'C': 4},
-        'B': {'A': 1, 'C': 2, 'D': 5},
-        'C': {'A': 4, 'B': 2, 'D': 1},
-        'D': {'B': 5, 'C': 1}
-    }
+def optionHandler(opt):
+    if opt == "1":
+        msm = "Ingrese el mensaje de la forma 'destino,mensaje': "
+        user_input = input(msm)
+        user_input = user_input.split(",")
+        node.receive_message(node.name, user_input[0], user_input[1])
+        return True
+    elif opt == "2":
+        msm = "Ingrese el mensaje de la forma 'emisor,destino,mensaje': "
+        mensaje = input(msm)
+        mensaje = mensaje.split(",")
+        mensaje = [x.strip() for x in mensaje]
+        node.receive_message(mensaje[0], mensaje[1], mensaje[2])
+        return True
+    elif opt == "3":
+        return False
+    else:
+        print("Opcion invalida.")
+        return True
 
-    start_node = 'A'
-    distances = dijkstra(graph, start_node)
-
-    # Crear y enviar paquetes JSON
-    for end_node, distance in distances.items():
-        packet = {
-            "type": "info",
-            "headers": {
-                "from": start_node,
-                "to": end_node,
-                "hop_count": distance
-            },
-            "payload": "Distancia desde {} a {}: {}".format(start_node, end_node, distance)
-        }
-        print(json.dumps(packet, indent=4))
 
 if __name__ == "__main__":
-    main()
+    node = DijkstraNode()
+    bandera = True
+    while bandera:
+        print("--------------Menu--------------")
+        print("1. Enviar mensaje")
+        print("2. Recibir mensaje")
+        print("3. Salir")
+        opcion = input("Ingrese opcion: ")
+        bandera = optionHandler(opcion)
+        
